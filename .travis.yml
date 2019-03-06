@@ -1,0 +1,25 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t dinglebarry/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run dinglebarry/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t dinglebarry/multi-client ./client
+  - docker build -t dinglebarry/multi-nginx ./nginx 
+  - docker build -t dinglebarry/multi-server ./server
+  - docker build -t dinglebarry/multi-worker ./worker
+
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "DOCKER_ID" --password-stdin
+  - docker push dinglebarry/multi-client
+  - docker push dinglebarry/multi-nginx
+  - docker push dinglebarry/multi-server
+  - docker push dinglebarry/multi-worker
+
+  #Push images to docker hub
+

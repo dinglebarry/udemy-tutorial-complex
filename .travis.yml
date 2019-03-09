@@ -16,10 +16,23 @@ after_success:
 
   # Log in to the docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  #Push images to docker hub
+
   - docker push dinglebarry/multi-client
   - docker push dinglebarry/multi-nginx
   - docker push dinglebarry/multi-server
   - docker push dinglebarry/multi-worker
 
-  #Push images to docker hub
-
+deploy:
+  provider: elasticbeanstalk
+  region: us-east-1
+  app: multi-docker
+  env: MultiDocker-env
+  bucket_name: elasticbeanstalk-us-east-1-241919074687
+  bucket_path: docker-multi
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: $AWS_SECRET_KEY
